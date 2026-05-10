@@ -17,36 +17,41 @@ This project demonstrates a beginner-friendly ETL and Data Warehouse implementat
 - Notion
 
 ## Database Structure
+### OLTP Tables
+- Customers
+- Products
+- Orders
+- OrderItems
 
-### Source Tables
-- customers
-- products
-- orders
-- orderitems
+### Data Warehouse Tables
+- DimCustomer
+- DimProduct
+- DimTime
+- FactSales
 
-### Dimension Tables
-- dimcustomer
-- dimproduct
-- dimtime
+## ETL Process
+- Extract data from OLTP tables
+- Transform and clean data
+- Load data into Star Schema tables
 
-### Fact Table
-- factsales
+## Validation Queries
+- Row count validation
+- Duplicate validation
+- Missing dimension validation
+- Amount validation
 
-## Analytics Query Example
-The project supports reporting queries such as:
-- Total Sales per Product
+## Analytical Queries
+- Total Sales per Month
+- Top Customers
 - Sales by Category
-- Monthly Sales Reports
+- Sales by City
+- Best-Selling Products
 
-## Setup Instructions
-1. Open XAMPP
-2. Start Apache and MySQL
-3. Open phpMyAdmin
-4. Create database: `online_store_dw`
-5. Import `setup.sql`
-
-## Project Screenshots
-See `/screenshots`
-
-## Architecture Diagram
-See `/diagrams`
+## Repository Structure
+```text
+online-store-datawarehouse/
+│
+├── setup.sql
+├── diagrams/
+├── screenshots/
+└── README.md
