@@ -6,9 +6,9 @@
 -- DBMS: MySQL / MariaDB
 -- =========================================
 -- LAYER OVERVIEW (all in one database):
---   OLTP Tables  = source/daily use
---   raw_*        = Bronze Layer (raw copy)
---   stg_*        = Silver Layer (cleaned)
+--   OLTP Tables    = source/daily use
+--   raw_*          = Bronze Layer (raw copy)
+--   stg_*          = Silver Layer (cleaned)
 --   dim_* / fact_* = Gold Layer (star schema)
 -- =========================================
 
@@ -28,39 +28,39 @@ USE online_store_dw;
 -- =========================================
 
 CREATE TABLE customers (
-    CustomerID   INT PRIMARY KEY AUTO_INCREMENT,
-    CustomerName VARCHAR(100) NOT NULL,
-    City         VARCHAR(100),
-    Email        VARCHAR(100),
-    CreatedAt    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    customer_id   INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100) NOT NULL,
+    city          VARCHAR(100),
+    email         VARCHAR(100),
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 CREATE TABLE products (
-    ProductID   INT PRIMARY KEY AUTO_INCREMENT,
-    ProductName VARCHAR(100) NOT NULL,
-    Category    VARCHAR(100),
-    UnitPrice   DECIMAL(10,2),
-    CreatedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    product_id   INT PRIMARY KEY AUTO_INCREMENT,
+    product_name VARCHAR(100) NOT NULL,
+    category     VARCHAR(100),
+    unit_price   DECIMAL(10,2),
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 CREATE TABLE orders (
-    OrderID    INT PRIMARY KEY AUTO_INCREMENT,
-    CustomerID INT NOT NULL,
-    OrderDate  DATE,
-    CreatedAt  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (CustomerID) REFERENCES customers(CustomerID)
+    order_id    INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT NOT NULL,
+    order_date  DATE,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE order_items (
-    OrderItemID INT PRIMARY KEY AUTO_INCREMENT,
-    OrderID     INT NOT NULL,
-    ProductID   INT NOT NULL,
-    Quantity    INT,
-    UnitPrice   DECIMAL(10,2),
-    TotalAmount DECIMAL(10,2),
-    CreatedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (OrderID)   REFERENCES orders(OrderID),
-    FOREIGN KEY (ProductID) REFERENCES products(ProductID)
+    order_item_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id      INT NOT NULL,
+    product_id    INT NOT NULL,
+    quantity      INT,
+    unit_price    DECIMAL(10,2),
+    total_amount  DECIMAL(10,2),
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id)   REFERENCES orders(order_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
 ) ENGINE=InnoDB;
 
 
@@ -68,24 +68,24 @@ CREATE TABLE order_items (
 -- SECTION 3: INSERT SAMPLE DATA (OLTP)
 -- =========================================
 
--- Customers (5 records)
-INSERT INTO customers (CustomerName, City, Email) VALUES
+-- customers (5 records)
+INSERT INTO customers (customer_name, city, email) VALUES
     ('John Cruz',      'Cagayan de Oro', 'john@gmail.com'),
     ('Maria Santos',   'Iligan City',    'maria@gmail.com'),
     ('Kevin Reyes',    'Malaybalay',     'kevin@gmail.com'),
     ('Anna Dela Cruz', 'Cagayan de Oro', 'anna@gmail.com'),
     ('Luis Gomez',     'Iligan City',    'luis@gmail.com');
 
--- Products (5 records, 3 categories)
-INSERT INTO products (ProductName, Category, UnitPrice) VALUES
+-- products (5 records, 3 categories)
+INSERT INTO products (product_name, category, unit_price) VALUES
     ('Mechanical Keyboard', 'Electronics', 2500.00),
     ('Gaming Mouse',        'Electronics', 1200.00),
     ('Office Chair',        'Furniture',   4500.00),
     ('USB-C Hub',           'Accessories',  850.00),
     ('Desk Lamp',           'Accessories',  650.00);
 
--- Orders (6 records, spread across 2 months)
-INSERT INTO orders (CustomerID, OrderDate) VALUES
+-- orders (6 records, spread across 2 months)
+INSERT INTO orders (customer_id, order_date) VALUES
     (1, '2026-04-10'),
     (2, '2026-04-15'),
     (3, '2026-04-20'),
@@ -93,8 +93,8 @@ INSERT INTO orders (CustomerID, OrderDate) VALUES
     (5, '2026-05-03'),
     (1, '2026-05-05');
 
--- Order Items (10 records)
-INSERT INTO order_items (OrderID, ProductID, Quantity, UnitPrice, TotalAmount) VALUES
+-- order_items (10 records)
+INSERT INTO order_items (order_id, product_id, quantity, unit_price, total_amount) VALUES
     (1, 1, 1, 2500.00, 2500.00),
     (1, 2, 2, 1200.00, 2400.00),
     (2, 3, 1, 4500.00, 4500.00),
@@ -115,32 +115,32 @@ INSERT INTO order_items (OrderID, ProductID, Quantity, UnitPrice, TotalAmount) V
 -- =========================================
 
 CREATE TABLE raw_customers (
-    CustomerID   INT,
-    CustomerName VARCHAR(100),
-    City         VARCHAR(100),
-    Email        VARCHAR(100)
+    customer_id   INT,
+    customer_name VARCHAR(100),
+    city          VARCHAR(100),
+    email         VARCHAR(100)
 ) ENGINE=InnoDB;
 
 CREATE TABLE raw_products (
-    ProductID   INT,
-    ProductName VARCHAR(100),
-    Category    VARCHAR(100),
-    UnitPrice   DECIMAL(10,2)
+    product_id   INT,
+    product_name VARCHAR(100),
+    category     VARCHAR(100),
+    unit_price   DECIMAL(10,2)
 ) ENGINE=InnoDB;
 
 CREATE TABLE raw_orders (
-    OrderID    INT,
-    CustomerID INT,
-    OrderDate  DATE
+    order_id    INT,
+    customer_id INT,
+    order_date  DATE
 ) ENGINE=InnoDB;
 
 CREATE TABLE raw_order_items (
-    OrderItemID INT,
-    OrderID     INT,
-    ProductID   INT,
-    Quantity    INT,
-    UnitPrice   DECIMAL(10,2),
-    TotalAmount DECIMAL(10,2)
+    order_item_id INT,
+    order_id      INT,
+    product_id    INT,
+    quantity      INT,
+    unit_price    DECIMAL(10,2),
+    total_amount  DECIMAL(10,2)
 ) ENGINE=InnoDB;
 
 
@@ -151,19 +151,19 @@ CREATE TABLE raw_order_items (
 -- =========================================
 
 INSERT INTO raw_customers
-SELECT CustomerID, CustomerName, City, Email
+SELECT customer_id, customer_name, city, email
 FROM customers;
 
 INSERT INTO raw_products
-SELECT ProductID, ProductName, Category, UnitPrice
+SELECT product_id, product_name, category, unit_price
 FROM products;
 
 INSERT INTO raw_orders
-SELECT OrderID, CustomerID, OrderDate
+SELECT order_id, customer_id, order_date
 FROM orders;
 
 INSERT INTO raw_order_items
-SELECT OrderItemID, OrderID, ProductID, Quantity, UnitPrice, TotalAmount
+SELECT order_item_id, order_id, product_id, quantity, unit_price, total_amount
 FROM order_items;
 
 
@@ -174,32 +174,32 @@ FROM order_items;
 -- =========================================
 
 CREATE TABLE stg_customers (
-    CustomerID   INT,
-    CustomerName VARCHAR(100),
-    City         VARCHAR(100),
-    Email        VARCHAR(100)
+    customer_id   INT,
+    customer_name VARCHAR(100),
+    city          VARCHAR(100),
+    email         VARCHAR(100)
 ) ENGINE=InnoDB;
 
 CREATE TABLE stg_products (
-    ProductID   INT,
-    ProductName VARCHAR(100),
-    Category    VARCHAR(100),
-    UnitPrice   DECIMAL(10,2)
+    product_id   INT,
+    product_name VARCHAR(100),
+    category     VARCHAR(100),
+    unit_price   DECIMAL(10,2)
 ) ENGINE=InnoDB;
 
 CREATE TABLE stg_orders (
-    OrderID    INT,
-    CustomerID INT,
-    OrderDate  DATE
+    order_id    INT,
+    customer_id INT,
+    order_date  DATE
 ) ENGINE=InnoDB;
 
 CREATE TABLE stg_order_items (
-    OrderItemID INT,
-    OrderID     INT,
-    ProductID   INT,
-    Quantity    INT,
-    UnitPrice   DECIMAL(10,2),
-    TotalAmount DECIMAL(10,2)
+    order_item_id INT,
+    order_id      INT,
+    product_id    INT,
+    quantity      INT,
+    unit_price    DECIMAL(10,2),
+    total_amount  DECIMAL(10,2)
 ) ENGINE=InnoDB;
 
 
@@ -207,53 +207,53 @@ CREATE TABLE stg_order_items (
 -- SECTION 7: SILVER ETL — TRANSFORM
 -- Clean and standardize Bronze data.
 -- TRIM removes extra spaces.
--- UPPER/LOWER standardizes text casing.
+-- LOWER standardizes email casing.
 -- WHERE filters out incomplete records.
 -- =========================================
 
 INSERT INTO stg_customers
 SELECT
-    CustomerID,
-    TRIM(CustomerName),
-    TRIM(City),
-    LOWER(TRIM(Email))
+    customer_id,
+    TRIM(customer_name),
+    TRIM(city),
+    LOWER(TRIM(email))
 FROM raw_customers
-WHERE CustomerName IS NOT NULL
-  AND Email        IS NOT NULL
-  AND City         IS NOT NULL;
+WHERE customer_name IS NOT NULL
+  AND email         IS NOT NULL
+  AND city          IS NOT NULL;
 
 INSERT INTO stg_products
 SELECT
-    ProductID,
-    TRIM(ProductName),
-    TRIM(Category),
-    UnitPrice
+    product_id,
+    TRIM(product_name),
+    TRIM(category),
+    unit_price
 FROM raw_products
-WHERE ProductName IS NOT NULL
-  AND Category    IS NOT NULL
-  AND UnitPrice   > 0;
+WHERE product_name IS NOT NULL
+  AND category     IS NOT NULL
+  AND unit_price   > 0;
 
 INSERT INTO stg_orders
 SELECT
-    OrderID,
-    CustomerID,
-    OrderDate
+    order_id,
+    customer_id,
+    order_date
 FROM raw_orders
-WHERE OrderDate   IS NOT NULL
-  AND CustomerID  IS NOT NULL;
+WHERE order_date   IS NOT NULL
+  AND customer_id  IS NOT NULL;
 
 INSERT INTO stg_order_items
 SELECT
-    OrderItemID,
-    OrderID,
-    ProductID,
-    Quantity,
-    UnitPrice,
-    TotalAmount
+    order_item_id,
+    order_id,
+    product_id,
+    quantity,
+    unit_price,
+    total_amount
 FROM raw_order_items
-WHERE Quantity    > 0
-  AND UnitPrice   > 0
-  AND TotalAmount > 0;
+WHERE quantity     > 0
+  AND unit_price   > 0
+  AND total_amount > 0;
 
 
 -- =========================================
@@ -264,45 +264,45 @@ WHERE Quantity    > 0
 
 -- Dimension: Customer
 CREATE TABLE dim_customer (
-    CustomerKey  INT PRIMARY KEY AUTO_INCREMENT,
-    CustomerID   INT,
-    CustomerName VARCHAR(100),
-    City         VARCHAR(100)
+    customer_key  INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id   INT,
+    customer_name VARCHAR(100),
+    city          VARCHAR(100)
 ) ENGINE=InnoDB;
 
 -- Dimension: Product
 CREATE TABLE dim_product (
-    ProductKey  INT PRIMARY KEY AUTO_INCREMENT,
-    ProductID   INT,
-    ProductName VARCHAR(100),
-    Category    VARCHAR(100)
+    product_key  INT PRIMARY KEY AUTO_INCREMENT,
+    product_id   INT,
+    product_name VARCHAR(100),
+    category     VARCHAR(100)
 ) ENGINE=InnoDB;
 
 -- Dimension: Time
 CREATE TABLE dim_time (
-    TimeKey   INT PRIMARY KEY AUTO_INCREMENT,
-    FullDate  DATE,
-    Day       INT,
-    MonthName VARCHAR(20),
-    Month     INT,
-    Quarter   INT,
-    Year      INT
+    time_key   INT PRIMARY KEY AUTO_INCREMENT,
+    full_date  DATE,
+    day        INT,
+    month_name VARCHAR(20),
+    month      INT,
+    quarter    INT,
+    year       INT
 ) ENGINE=InnoDB;
 
 -- Fact Table: fact_sales
 -- GRAIN: One row per purchased item.
 --        Each row = one row in order_items.
 CREATE TABLE fact_sales (
-    SalesKey    INT PRIMARY KEY AUTO_INCREMENT,
-    CustomerKey INT,
-    ProductKey  INT,
-    TimeKey     INT,
-    Quantity    INT,
-    UnitPrice   DECIMAL(10,2),
-    TotalAmount DECIMAL(10,2),
-    FOREIGN KEY (CustomerKey) REFERENCES dim_customer(CustomerKey),
-    FOREIGN KEY (ProductKey)  REFERENCES dim_product(ProductKey),
-    FOREIGN KEY (TimeKey)     REFERENCES dim_time(TimeKey)
+    sales_key    INT PRIMARY KEY AUTO_INCREMENT,
+    customer_key INT,
+    product_key  INT,
+    time_key     INT,
+    quantity     INT,
+    unit_price   DECIMAL(10,2),
+    total_amount DECIMAL(10,2),
+    FOREIGN KEY (customer_key) REFERENCES dim_customer(customer_key),
+    FOREIGN KEY (product_key)  REFERENCES dim_product(product_key),
+    FOREIGN KEY (time_key)     REFERENCES dim_time(time_key)
 ) ENGINE=InnoDB;
 
 
@@ -313,43 +313,43 @@ CREATE TABLE fact_sales (
 -- =========================================
 
 -- Load dim_customer from Silver
-INSERT INTO dim_customer (CustomerID, CustomerName, City)
-SELECT CustomerID, CustomerName, City
+INSERT INTO dim_customer (customer_id, customer_name, city)
+SELECT customer_id, customer_name, city
 FROM stg_customers;
 
 -- Load dim_product from Silver
-INSERT INTO dim_product (ProductID, ProductName, Category)
-SELECT ProductID, ProductName, Category
+INSERT INTO dim_product (product_id, product_name, category)
+SELECT product_id, product_name, category
 FROM stg_products;
 
 -- Load dim_time from Silver (distinct dates only)
-INSERT INTO dim_time (FullDate, Day, MonthName, Month, Quarter, Year)
+INSERT INTO dim_time (full_date, day, month_name, month, quarter, year)
 SELECT DISTINCT
-    OrderDate,
-    DAY(OrderDate),
-    MONTHNAME(OrderDate),
-    MONTH(OrderDate),
-    QUARTER(OrderDate),
-    YEAR(OrderDate)
+    order_date,
+    DAY(order_date),
+    MONTHNAME(order_date),
+    MONTH(order_date),
+    QUARTER(order_date),
+    YEAR(order_date)
 FROM stg_orders;
 
 -- Load fact_sales from Silver
--- Joins stg tables to get surrogate keys from Gold dims
-INSERT INTO fact_sales (CustomerKey, ProductKey, TimeKey, Quantity, UnitPrice, TotalAmount)
+-- Joins stg_ tables to get surrogate keys from Gold dims
+INSERT INTO fact_sales (customer_key, product_key, time_key, quantity, unit_price, total_amount)
 SELECT
-    dc.CustomerKey,
-    dp.ProductKey,
-    dt.TimeKey,
-    oi.Quantity,
-    oi.UnitPrice,
-    oi.TotalAmount
+    dc.customer_key,
+    dp.product_key,
+    dt.time_key,
+    oi.quantity,
+    oi.unit_price,
+    oi.total_amount
 FROM stg_order_items oi
-JOIN stg_orders      o  ON oi.OrderID   = o.OrderID
-JOIN stg_customers   c  ON o.CustomerID = c.CustomerID
-JOIN stg_products    p  ON oi.ProductID = p.ProductID
-JOIN dim_customer    dc ON c.CustomerID = dc.CustomerID
-JOIN dim_product     dp ON p.ProductID  = dp.ProductID
-JOIN dim_time        dt ON o.OrderDate  = dt.FullDate;
+JOIN stg_orders    o  ON oi.order_id    = o.order_id
+JOIN stg_customers c  ON o.customer_id  = c.customer_id
+JOIN stg_products  p  ON oi.product_id  = p.product_id
+JOIN dim_customer  dc ON c.customer_id  = dc.customer_id
+JOIN dim_product   dp ON p.product_id   = dp.product_id
+JOIN dim_time      dt ON o.order_date   = dt.full_date;
 
 
 -- =========================================
@@ -357,45 +357,49 @@ JOIN dim_time        dt ON o.OrderDate  = dt.FullDate;
 -- =========================================
 
 -- 1. Row Count Check
---    Expected: Both counts = 10 (match order_items)
-SELECT COUNT(*) AS OLTPOrderItemsCount  FROM order_items;
-SELECT COUNT(*) AS BronzeRawCount       FROM raw_order_items;
-SELECT COUNT(*) AS SilverStagingCount   FROM stg_order_items;
-SELECT COUNT(*) AS GoldFactSalesCount   FROM fact_sales;
+--    Expected: All four counts = 10
+SELECT COUNT(*) AS oltp_order_items_count  FROM order_items;
+SELECT COUNT(*) AS bronze_raw_count        FROM raw_order_items;
+SELECT COUNT(*) AS silver_staging_count    FROM stg_order_items;
+SELECT COUNT(*) AS gold_fact_sales_count   FROM fact_sales;
 
 -- 2. Amount / Measure Check
 --    Expected: Zero rows (no incorrect totals)
 SELECT *
 FROM fact_sales
-WHERE TotalAmount <> Quantity * UnitPrice;
+WHERE total_amount <> quantity * unit_price;
 
 -- 3. Duplicate Check
 --    Expected: Zero rows (no duplicate fact records)
-SELECT CustomerKey, ProductKey, TimeKey, COUNT(*) AS DuplicateCount
+SELECT
+    customer_key,
+    product_key,
+    time_key,
+    COUNT(*) AS duplicate_count
 FROM fact_sales
-GROUP BY CustomerKey, ProductKey, TimeKey
+GROUP BY customer_key, product_key, time_key
 HAVING COUNT(*) > 1;
 
 -- 4. Missing Date Check
 --    Expected: Zero rows (all dates exist in dim_time)
 SELECT *
 FROM fact_sales fs
-LEFT JOIN dim_time dt ON fs.TimeKey = dt.TimeKey
-WHERE dt.TimeKey IS NULL;
+LEFT JOIN dim_time dt ON fs.time_key = dt.time_key
+WHERE dt.time_key IS NULL;
 
 -- 5. Missing Customer Dimension Check
 --    Expected: Zero rows
 SELECT *
 FROM fact_sales fs
-LEFT JOIN dim_customer dc ON fs.CustomerKey = dc.CustomerKey
-WHERE dc.CustomerKey IS NULL;
+LEFT JOIN dim_customer dc ON fs.customer_key = dc.customer_key
+WHERE dc.customer_key IS NULL;
 
 -- 6. Missing Product Dimension Check
 --    Expected: Zero rows
 SELECT *
 FROM fact_sales fs
-LEFT JOIN dim_product dp ON fs.ProductKey = dp.ProductKey
-WHERE dp.ProductKey IS NULL;
+LEFT JOIN dim_product dp ON fs.product_key = dp.product_key
+WHERE dp.product_key IS NULL;
 
 
 -- =========================================
@@ -405,59 +409,59 @@ WHERE dp.ProductKey IS NULL;
 -- Query 1: Total Sales per Month
 --   Business use: Identify which months generate the most revenue.
 SELECT
-    dt.Year,
-    dt.MonthName,
-    SUM(fs.TotalAmount) AS TotalSales
+    dt.year,
+    dt.month_name,
+    SUM(fs.total_amount) AS total_sales
 FROM fact_sales fs
-JOIN dim_time dt ON fs.TimeKey = dt.TimeKey
-GROUP BY dt.Year, dt.MonthName, dt.Month
-ORDER BY dt.Year, dt.Month;
+JOIN dim_time dt ON fs.time_key = dt.time_key
+GROUP BY dt.year, dt.month_name, dt.month
+ORDER BY dt.year, dt.month;
 
 -- Query 2: Top Customers by Total Amount Spent
 --   Business use: Identify high-value customers for loyalty programs.
 SELECT
-    dc.CustomerName,
-    dc.City,
-    SUM(fs.TotalAmount) AS TotalSpent,
-    SUM(fs.Quantity)    AS TotalItemsBought
+    dc.customer_name,
+    dc.city,
+    SUM(fs.total_amount) AS total_spent,
+    SUM(fs.quantity)     AS total_items_bought
 FROM fact_sales fs
-JOIN dim_customer dc ON fs.CustomerKey = dc.CustomerKey
-GROUP BY dc.CustomerKey, dc.CustomerName, dc.City
-ORDER BY TotalSpent DESC;
+JOIN dim_customer dc ON fs.customer_key = dc.customer_key
+GROUP BY dc.customer_key, dc.customer_name, dc.city
+ORDER BY total_spent DESC;
 
 -- Query 3: Sales by Product Category
 --   Business use: Determine which categories drive the most revenue.
 SELECT
-    dp.Category,
-    SUM(fs.TotalAmount) AS CategorySales,
-    SUM(fs.Quantity)    AS UnitsSold
+    dp.category,
+    SUM(fs.total_amount) AS category_sales,
+    SUM(fs.quantity)     AS units_sold
 FROM fact_sales fs
-JOIN dim_product dp ON fs.ProductKey = dp.ProductKey
-GROUP BY dp.Category
-ORDER BY CategorySales DESC;
+JOIN dim_product dp ON fs.product_key = dp.product_key
+GROUP BY dp.category
+ORDER BY category_sales DESC;
 
 -- Query 4: Sales by City
 --   Business use: Identify top cities for targeted marketing.
 SELECT
-    dc.City,
-    SUM(fs.TotalAmount)  AS CitySales,
-    COUNT(fs.SalesKey)   AS NumberOfTransactions
+    dc.city,
+    SUM(fs.total_amount) AS city_sales,
+    COUNT(fs.sales_key)  AS number_of_transactions
 FROM fact_sales fs
-JOIN dim_customer dc ON fs.CustomerKey = dc.CustomerKey
-GROUP BY dc.City
-ORDER BY CitySales DESC;
+JOIN dim_customer dc ON fs.customer_key = dc.customer_key
+GROUP BY dc.city
+ORDER BY city_sales DESC;
 
 -- Query 5: Best-Selling Products by Quantity Sold
 --   Business use: Determine which products to restock or promote.
 SELECT
-    dp.ProductName,
-    dp.Category,
-    SUM(fs.Quantity)    AS TotalQuantitySold,
-    SUM(fs.TotalAmount) AS TotalRevenue
+    dp.product_name,
+    dp.category,
+    SUM(fs.quantity)     AS total_quantity_sold,
+    SUM(fs.total_amount) AS total_revenue
 FROM fact_sales fs
-JOIN dim_product dp ON fs.ProductKey = dp.ProductKey
-GROUP BY dp.ProductKey, dp.ProductName, dp.Category
-ORDER BY TotalQuantitySold DESC;
+JOIN dim_product dp ON fs.product_key = dp.product_key
+GROUP BY dp.product_key, dp.product_name, dp.category
+ORDER BY total_quantity_sold DESC;
 
 
 -- =========================================
